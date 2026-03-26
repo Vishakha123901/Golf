@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       const passwordHash = await hashPassword('temp_password_' + Date.now())
       
       const { data: user, error } = await (supabaseAdmin
-        .from('users')
+        .from('users') as any)
         .insert({
           email: customer.email!,
           password_hash: passwordHash, // User will set password later
@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
           last_name: metadata.lastName || '',
           subscription_status: 'active' as const,
           subscription_plan: metadata.plan as 'monthly' | 'yearly',
-          subscription_start_date: new Date(subscription.current_period_start * 1000).toISOString(),
-          subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+          subscription_start_date: new Date(((subscription as any).current_period_start) * 1000).toISOString(),
+          subscription_end_date: new Date(((subscription as any).current_period_end) * 1000).toISOString(),
           stripe_customer_id: session.customer as string,
           selected_charity_id: metadata.charityId || null,
           charity_contribution_percentage: parseInt(metadata.charityContribution || '10')
         })
         .select()
-        .single() as any)
+        .single()
 
       if (error) {
         console.error('User creation error:', error)
@@ -66,12 +66,12 @@ export async function POST(request: NextRequest) {
       
       // Update subscription status
       await (supabaseAdmin
-        .from('users')
+        .from('users') as any)
         .update({ 
           subscription_status: 'active' as const,
           subscription_end_date: new Date((invoice.lines.data[0].period?.end || 0) * 1000).toISOString()
         })
-        .eq('stripe_customer_id', invoice.customer as string) as any)
+        .eq('stripe_customer_id', invoice.customer as string)
     }
 
     // Handle failed payments
@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
       
       // Update subscription status to inactive
       await (supabaseAdmin
-        .from('users')
+        .from('users') as any)
         .update({ subscription_status: 'inactive' as const })
-        .eq('stripe_customer_id', invoice.customer as string) as any)
+        .eq('stripe_customer_id', invoice.customer as string)
     }
 
     return NextResponse.json({ received: true })

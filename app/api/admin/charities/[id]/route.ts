@@ -18,7 +18,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Update charity
     const { data: updatedCharity, error } = await (supabaseAdmin
-      .from('charities')
+      .from('charities') as any)
       .update({
         name,
         description,
@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       })
       .eq('id', params.id)
       .select()
-      .single() as any)
+      .single()
 
     if (error) {
       console.error('Error updating charity:', error)

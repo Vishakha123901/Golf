@@ -68,10 +68,10 @@ export async function POST(request: NextRequest) {
 
     // Create user in database
     const { data: user, error } = await (supabaseAdmin
-      .from('users')
+      .from('users') as any)
       .insert(userData)
       .select()
-      .single() as any)
+      .single()
 
     if (error) {
       console.error('Database error:', error)

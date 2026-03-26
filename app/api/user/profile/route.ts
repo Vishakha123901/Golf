@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user profile with charity info
-    const { data: profile } = await supabaseAdmin
-      .from('users')
+    const { data: profile, error: profileError } = await (supabaseAdmin
+      .from('users') as any)
       .select(`
         *,
         charities (
@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
       `)
       .eq('id', user.id)
       .single()
+
+    if (profileError || !profile) {
+      return NextResponse.json({ message: 'Profile not found' }, { status: 404 })
+    }
 
     return NextResponse.json({
       profile: {
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
         subscriptionEndDate: profile.subscription_end_date,
         selectedCharityId: profile.selected_charity_id,
         charityContributionPercentage: profile.charity_contribution_percentage,
-        charity: profile.charities
+        charity: (profile as any).charities
       }
     })
 
@@ -67,7 +71,7 @@ export async function PATCH(request: NextRequest) {
 
     // Update user profile
     const { data: updatedUser, error } = await (supabaseAdmin
-      .from('users')
+      .from('users') as any)
       .update({
         first_name: firstName,
         last_name: lastName,
@@ -77,7 +81,7 @@ export async function PATCH(request: NextRequest) {
       })
       .eq('id', user.id)
       .select()
-      .single() as any)
+      .single()
 
     if (error) {
       console.error('Error updating profile:', error)

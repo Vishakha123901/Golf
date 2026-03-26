@@ -22,16 +22,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current scores count
-    const { data: currentScores } = await supabaseAdmin
-      .from('golf_scores')
+    const { data: currentScores } = await (supabaseAdmin
+      .from('golf_scores') as any)
       .select('id')
       .eq('user_id', user.id)
       .order('score_date', { ascending: false })
 
     // If user already has 5 scores, delete the oldest one
     if (currentScores && currentScores.length >= 5) {
-      const { data: oldestScore } = await supabaseAdmin
-        .from('golf_scores')
+      const { data: oldestScore } = await (supabaseAdmin
+        .from('golf_scores') as any)
         .select('id')
         .eq('user_id', user.id)
         .order('score_date', { ascending: true })
@@ -39,16 +39,16 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (oldestScore) {
-        await supabaseAdmin
-          .from('golf_scores')
+        await (supabaseAdmin
+          .from('golf_scores') as any)
           .delete()
-          .eq('id', oldestScore.id)
+          .eq('id', (oldestScore as any).id)
       }
     }
 
     // Add new score
-    const { data: newScore, error } = await supabaseAdmin
-      .from('golf_scores')
+    const { data: newScore, error } = await (supabaseAdmin
+      .from('golf_scores') as any)
       .insert({
         user_id: user.id,
         score: parseInt(score),
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('Error adding score:', error)
       return NextResponse.json({ message: 'Failed to add score' }, { status: 500 })
     }
 
@@ -84,8 +85,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 401 })
     }
 
-    const { data: scores } = await supabaseAdmin
-      .from('golf_scores')
+    const { data: scores } = await (supabaseAdmin
+      .from('golf_scores') as any)
       .select('*')
       .eq('user_id', user.id)
       .order('score_date', { ascending: false })

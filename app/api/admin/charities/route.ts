@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Create new charity
     const { data: newCharity, error } = await (supabaseAdmin
-      .from('charities')
+      .from('charities') as any)
       .insert({
         name,
         description,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         // Note: category field doesn't exist in schema, removing it
       })
       .select()
-      .single() as any)
+      .single()
 
     if (error) {
       console.error('Error creating charity:', error)
